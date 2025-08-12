@@ -1,0 +1,2 @@
+# Smart-Librarian
+AI cu RAG + Tool  Completion
