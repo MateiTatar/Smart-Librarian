@@ -1,12 +1,6 @@
-# Smart Librarian — Quickstart
+# Smart Librarian
 
-Scurt: proiectul oferă un prototip RAG (ChromaDB + OpenAI embeddings) cu un fallback OFFLINE (TF‑IDF) pentru testare locală fără cheie API.
-
-Conținutul README:
-
-- Cum rulezi rapid offline (fără OpenAI)
-- Cum setezi cheia OpenAI și faci ingest (online)
-- Notițe de securitate și pași următori
+Proiectul oferă un prototip RAG (ChromaDB + OpenAI embeddings) cu un fallback OFFLINE (TF‑IDF) pentru testare locală fără cheie API.
 
 ## 1) Presupuneri
 - Python 3.10+ (recomandat 3.11/3.12)
@@ -20,7 +14,7 @@ Activează mediul virtual și instalează dependențele:
 pip install -r .\requirements.txt
 ```
 
-Note: `scikit-learn` este folosit pentru modul offline (TF‑IDF). Dacă instalezi doar offline, poți instala doar acel pachet.
+Note: `scikit-learn` este folosit pentru modul offline (TF‑IDF).
 
 ## 3) Test rapid OFFLINE (fără cheia OpenAI)
 Acesta e fluxul recomandat pentru a verifica funcționalitatea fără a avea cheia OpenAI:
@@ -79,7 +73,6 @@ python .\app_cli.py
 - Dacă ai pus cheia în chat, rotește/regenerează cheia imediat în OpenAI dashboard.
 
 ## 8) Commit și workflow
-Am adăugat acest `README.md` în repo. Pașii pentru a publica schimbările local și remote:
 
 ```powershell
 # verifică starea
@@ -91,13 +84,6 @@ git commit -m "docs: add README with offline/online quickstart and commands"
 # push
 git push origin main
 ```
-
-Dacă vrei, pot rula `git add` + `git commit` acum pentru tine (sau pot face și push, dacă îmi ceri explicit). Spune-mi cum preferi.
-
----
-Puncte posibile următoare: adăug buton ON/OFF în Streamlit, testare automată simplă (unit + smoke), sau implementare TTS real.# Smart Librarian
-
-Proiect demonstrativ: Chatbot AI cu RAG (ChromaDB) + tool pentru rezumate detaliate.
 
 Structură:
 - CLI: app_cli.py
