@@ -17,25 +17,29 @@ except Exception:
     SKLEARN_AVAILABLE = False
 
 cfg = load_env()
-OPENAI_API_KEY = cfg.get('OPENAI_API_KEY')
-CHROMA_DB_DIR = cfg.get('CHROMA_DB_DIR')
-EMBEDDING_MODEL = cfg.get('EMBEDDING_MODEL')
-COLLECTION_NAME = cfg.get('COLLECTION_NAME')
+# prefer environment over .env file value
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY') or cfg.get('OPENAI_API_KEY')
+CHROMA_DB_DIR = os.getenv('CHROMA_DB_DIR') or cfg.get('CHROMA_DB_DIR')
+EMBEDDING_MODEL = os.getenv('EMBEDDING_MODEL') or cfg.get('EMBEDDING_MODEL')
+COLLECTION_NAME = os.getenv('COLLECTION_NAME') or cfg.get('COLLECTION_NAME')
 
 
 class Retriever:
     """Online Retriever using OpenAI embeddings + ChromaDB."""
     def __init__(self, top_k: int = 3):
+        # prefer env var; final safety check
         if not OPENAI_API_KEY:
             raise RuntimeError("OPENAI_API_KEY not set — online retriever requires a key")
-    # Lazy import to avoid requiring openai/chromadb for offline mode
-    from openai import OpenAI as _OpenAI
-    import chromadb as _chromadb
-    from chromadb.config import Settings as _Settings
-    self.openai = _OpenAI(api_key=OPENAI_API_KEY)
-    self.client = _chromadb.Client(_Settings(persist_directory=CHROMA_DB_DIR, anonymized_telemetry=False))
-    self.collection = self.client.get_or_create_collection(COLLECTION_NAME)
-    self.top_k = top_k
+        # Lazy import to avoid requiring openai/chromadb at module import time
+        from openai import OpenAI as _OpenAI
+        import chromadb as _chromadb
+        from chromadb.config import Settings as _Settings
+
+        # create clients
+        self.openai = _OpenAI(api_key=OPENAI_API_KEY)
+        self.client = _chromadb.Client(_Settings(persist_directory=CHROMA_DB_DIR, anonymized_telemetry=False))
+        self.collection = self.client.get_or_create_collection(COLLECTION_NAME)
+        self.top_k = top_k
 
     def embed(self, text: str) -> List[float]:
         r = self.openai.embeddings.create(model=EMBEDDING_MODEL, input=text)
@@ -44,11 +48,29 @@ class Retriever:
     def retrieve(self, query: str):
         emb = self.embed(query)
         results = self.collection.query(query_embeddings=[emb], n_results=self.top_k)
-        # return list of metadata titles
+        # results may contain 'metadatas' and 'distances'
         titles = []
-        for md_list in results.get('metadatas', []):
-            for md in md_list:
-                titles.append(md.get('title'))
+        metadatas = results.get('metadatas', [])
+        distances = results.get('distances', [])
+        # distances is usually a list of lists; take first
+        dlist = []
+        if distances:
+            try:
+                dlist = distances[0]
+            except Exception:
+                dlist = []
+        for idx, md_list in enumerate(metadatas):
+            for j, md in enumerate(md_list):
+                title = md.get('title')
+                # map distance -> score (higher = better). If no distances, use 0.
+                score = 0.0
+                if j < len(dlist):
+                    try:
+                        dist = float(dlist[j])
+                        score = 1.0 / (1.0 + dist)
+                    except Exception:
+                        score = 0.0
+                titles.append((title, float(score)))
         return titles
 
 
