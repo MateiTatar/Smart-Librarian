@@ -1,4 +1,4 @@
-# Smart Librarian — Quickstart
+# Smart Librarian
 
 Proiectul oferă un prototip RAG (ChromaDB + OpenAI embeddings) cu un fallback OFFLINE (TF‑IDF) pentru testare locală fără cheie API.
 
