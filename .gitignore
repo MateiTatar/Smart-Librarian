@@ -1,0 +1,22 @@
+# Virtual environment
+.venv/
+
+# dotenv
+.env
+
+# ChromaDB persistence
+chroma_db/
+.chroma_db/
+
+# outputs and caches
+outputs/
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
