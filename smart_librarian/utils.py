@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
 import os
-from dotenv import load_dotenv
+
+
+def _try_load_dotenv(path: str):
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(path)
+    except Exception:
+        # python-dotenv not available or failed; fallback to environment only
+        return
 
 
 def load_env(env_path: str = None):
     if env_path is None:
         env_path = os.path.join(os.getcwd(), '.env')
-    load_dotenv(env_path)
+    _try_load_dotenv(env_path)
     config = {
         'OPENAI_API_KEY': os.getenv('OPENAI_API_KEY'),
         'CHROMA_DB_DIR': os.getenv('CHROMA_DB_DIR', './chroma_db'),
